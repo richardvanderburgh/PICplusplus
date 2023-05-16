@@ -8,8 +8,8 @@ add_library(${PROJECT_NAME} STATIC
 
 include/First_EE.hpp
 include/init.hpp
-include/fft.h
-include/complex.h
+include/fft.hpp
+include/complex.hpp
 
 fft.cpp
 complex.cpp

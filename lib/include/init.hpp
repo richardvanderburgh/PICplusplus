@@ -1,21 +1,18 @@
 #pragma once
 
 #include <algorithm>
-#include <iostream>
 #include <array>
-#include <vector>
 #include <cmath>
 #include <corecrt_math_defines.h>
-
-// #include <Eigen/Dense>
-//#include <unsupported/Eigen/FFT>
-#include "fft.h"
+#include <iostream>
 #include <matplot/matplot.h>
 #include <thread>
+#include <vector>
+
+#include "fft.hpp"
 
 class Init {
 public:
-
 	void initialize() {
 		//int ng, int nt, double L, double dt, std::vector<int> N, int nsp, std::vector<double> qm, std::vector<double> wp, std::vector<double> wc, int mplot
 		// 
@@ -44,7 +41,6 @@ public:
 		int ifvx = 0;// nt / 10 + 4;
 		int nplot = 30; // ? ?
 
-
 		// //Species Input Variables
 		std::vector<int> N = { 100, 100 }; // Number of simulation particles
 		std::array<int, 2> wp = { 1, 1 }; // Plasma Frequency
@@ -72,11 +68,9 @@ public:
 		int angle = 0; // Magnetic field angle
 
 		double step_size = L / ng;
-
 		std::vector<double> gridx;
 
-		for (double x = 0.0; x <= L; x += step_size)
-		{
+		for (double x = 0.0; x <= L; x += step_size) {
 			gridx.push_back(x);
 		}
 
@@ -84,64 +78,45 @@ public:
 		double dtdx = dt / dx;
 		int nxp1 = ng + 1;
 		int nxp2 = ng + 2;
-
-		// renormalizes
-		// cs = cv ^ 2;
-
 		int slx = ng;
 		int npt = 0;
 
-		for (int i = 0; i < nsp; i++)
-		{
+		for (int i = 0; i < nsp; i++) {
 			npt += N[i];
 		}
 
 		std::vector<int> X1;
+		std::vector<int> X2;
+		std::vector<int> X3;
 
-		for (int i = 1; i <= ng; i++)
-		{
+		for (int i = 1; i <= ng; i++) {
 			X1.push_back(i);
 		}
 
-		std::vector<int> X2;
-
-		for (int i = 2; i <= ng + 1; i++)
-		{
+		for (int i = 2; i <= ng + 1; i++) {
 			X2.push_back(i);
 		}
 
-		std::vector<int> X3;
-
-		for (int i = 3; i <= ng + 2; i++)
-		{
+		for (int i = 3; i <= ng + 2; i++) {
 			X3.push_back(i);
 		}
 
 		int cs = cv * cv;
-		//tcs = 2.0 * cs;
 
 		std::vector<double> q(nsp, 0.0);
 		std::vector<double> mass(nsp, 0.0);
 
-		for (int i = 0; i < nsp; i++)
-		{
+		for (int i = 0; i < nsp; i++) {
 			q[i] = ng / N[i] * (wp[i] * wp[i]) / qm[i];
 		}
 
-
-		for (int i = 0; i < nsp; i++)
-		{
+		for (int i = 0; i < nsp; i++) {
 			mass[i] = q[i] / qm[i];
 		}
-
-		// rho0 = -sum(q(1:nsp).*N(1:nsp)) / ng;
-		// rho0 = rho0 * ones(nxp2, 1);
 
 		double theta = M_PI / 180 * angle;
 		double costh = cos(theta);
 		double sinth = sin(theta);
-
-		//
 		double b0 = wc[1] / qm[1];
 		double bx0 = b0 * costh;
 		double by0 = b0 * sinth;
@@ -154,7 +129,6 @@ public:
 				E[i][j] = 0.0;
 			}
 		}
-
 		// --Field Initialization --
 		std::vector<double> ex(nxp2, 0.0);
 		std::vector<double> ey(nxp2, 0.0);
@@ -165,10 +139,7 @@ public:
 		std::vector<double> ajy(nxp2, 0.0);
 		std::vector<double> ajz(nxp2, 0.0);
 
-		// rho = zeros(nxp2, 1);
-
 		int maxN = *std::max_element(N.begin(), N.end());
-
 		std::vector<std::vector<double>> x(nsp, std::vector<double>(maxN, 0.0));
 		std::vector<std::vector<double>> vx(nsp, std::vector<double>(maxN, 0.0));
 		std::vector<std::vector<double>> vy(nsp, std::vector<double>(maxN, 0.0));
@@ -176,44 +147,39 @@ public:
 
 		//// Energies
 		// Total time for plot
-
-		std::vector<double> ESE(nt + 1, 0.0);
-		std::vector<double> esestot(nt + 1, 0.0);
 		std::vector<std::vector<double>> esem(nt + 1, std::vector<double>(mplot + 1, 0.0));
-
 		std::vector<std::vector<double>> ke(nt + 1, std::vector<double>(nsp, 0.0));
 		std::vector<std::vector<double>> p(nt + 1, std::vector<double>(nsp, 0.0));
 		std::vector<std::vector<double>> de(nt + 1, std::vector<double>(nsp, 0.0));
 		std::vector<std::vector<double>> therme(nt + 1, std::vector<double>(nsp, 0.0));
-		std::vector<double> te(nt + 1, 0.0);
-
 		std::vector<std::vector<double>> v_old(maxN, std::vector<double>(nsp));
 		std::vector<std::vector<double>> vy_old(maxN, std::vector<double>(nsp));
-		std::vector<double> ddx(nsp);
+		std::vector<double> ESE(nt + 1, 0.0);
+		std::vector<double> esestot(nt + 1, 0.0);
+		std::vector<double> te(nt + 1, 0.0);
 
+		std::vector<double> ddx(nsp);
 		std::vector<double> m(nsp);
 		std::vector<double> T(nsp);
 
 		for (int species = 0; species < nsp; species++)
 		{
-			double ngr = N[species] / nlg[species];
-
 			q[species] = L * wp[species] * wp[species] / (epsi * N[species] * qm[species]);
 			m[species] = q[species] / qm[species];
-			double nm = N[species] * m[species];
 			T[species] = tan(-wc[species] * dt / 2.);
 			ddx[species] = L / N[species];
+
+			double ngr = N[species] / nlg[species];
+			double nm = N[species] * m[species];
 			double lg = L / nlg[species];
 
 			// Set evenly spaced charge distribution distribution
 			// remember that ddx is the width of the charge cloud
-			for (int I = 1; I < N[species] + 1; I++)
-			{
+			for (int I = 1; I < N[species] + 1; I++) {
 				x[species][I - 1] = (I - 0.5) * ddx[species];
 			}
 
-			for (int I = 0; I < N[species]; I++)
-			{
+			for (int I = 0; I < N[species]; I++) {
 				vx[species][I] = v0[species];
 			}
 
@@ -327,7 +293,6 @@ public:
 				}
 			}
 
-
 			for (int a = 0; a < N[species]; ++a) {
 				double theta = 2 * M_PI * mode[species] * x[species][a] / L;
 				x[species][a] = x[species][a] + x1[species] * cos(theta + thetax[species]);
@@ -340,8 +305,6 @@ public:
 					x[species][a] = x[species][a] + L;
 				}
 			}
-
-
 		}
 		std::vector<double> N_grid = linspace(0, L, 32);
 		std::vector<double> gridt = linspace(0, (nt + 1) * dt, nt + 1);
@@ -351,9 +314,8 @@ public:
 		std::vector<double> phit(nt, 0.0);
 
 		// End of INIT
-
+		// 
 		// SETRHO - c  Converts position to computer normalization and accumulates charge density.
-
 		std::vector<double> qdx{ q[0] / dx, q[1] / dx };
 		std::vector<double> rho(ng + 1, 0.0); // charge density at the spatial grid points
 		std::vector<std::vector<double>> rhos(nsp, std::vector<double>(ng + 1, 0.0));
@@ -421,24 +383,18 @@ public:
 			for (int K = 0; K < N[species]; ++K) {
 				vx[species][K] *= dtdx;
 			}
-
 		}
 
 		std::vector<double> a(ng + 1);
+
 		int t = 0;
 		double ael = 1;
 		fields(rho, L, iw, dx, E, t, ng, a, ael);
-
-		int dum = 0;
-
 		accel(nsp, dx, dt, t, q, m, ael, a, ng, N, x, vx);
 
 		//BEGIN TIME LOOP //////////////////////////////////////////////////////////////////
 		// Create a figure and set the x and y limits
 		matplot::figure("Animation");
-		//matplot::xlim(-5, 5);
-		//matplot::ylim(-5, 5);
-
 
 		for (int t = 1; t <= nt; t++) {
 
@@ -452,28 +408,12 @@ public:
 			testV1.emplace_back(1);
 			testV2.emplace_back(1);
 
-			//matplot::scatter(testV1, testV2);
-			//std::vector<double> x = matplot::linspace(0, 2 * M_PI);
-			//std::vector<double> y = matplot::transform(x, [](auto x) { return sin(x); });
-			//matplot::color color1 
-			//std::string color = "red";
-
-			//matplot::plot(x[0], vx[0], "o", "color", color);
-			//matplot::plot(x[0], vx[0], "o");
-
-			//matplot::plot(x[1], vx[1], "--xr");
-
+			// Create a scatter plot 
 			matplot::scatter(x[0], vx[0], 1);
 			matplot::hold(true);
 			matplot::scatter(x[1], vx[1], 1);
 
-			// Create a scatter plot object
-			//auto scatter = matplot::scatter(x[0], vx[0]);
-
-			// Update the plot and pause for a short time
 			matplot::show();
-			//std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
 			matplot::hold(false);
 			std::cout << "t = " << t << std::endl;
 		}
@@ -482,10 +422,7 @@ public:
 	{
 		// FIELDS - E field solver
 		const int ng = 32;
-		//std::vector<double> rhok(ng + 1, 0.0);
-		//std::vector<double> phik(ng + 1, 0.0);
 		std::vector<double> phi(ng + 1, 0.0);
-		//std::vector<double> rhok(ng + 1, 0.0);
 		double l = L;
 
 		// Transform charge density.
@@ -513,7 +450,6 @@ public:
 			}
 
 			complexPhik[k] = complexRhok[k] / -std::pow(2.0 * M_PI * ii / L, 2.0);
-
 			//esestot[t + 1] = (esestot[t + 1] - (phik[k] * rhok[k])) / 2;
 		}
 
@@ -532,9 +468,8 @@ public:
 	   //}
 		if (iw == 1 || iw == 2)
 		{
-			for (int j = 1; j < ng; j++)
-			{
-				E[j][t] = (phi[j - 1] - phi[j+1]) / (2.0 * dx);
+			for (int j = 1; j < ng; j++) {
+				E[j][t] = (phi[j - 1] - phi[j + 1]) / (2.0 * dx);
 			}
 			E[0][t] = (phi[ng - 1] - phi[1]) / (2.0 * dx);
 			E[ng][t] = E[0][t];
@@ -542,31 +477,25 @@ public:
 		else if (iw == 3)
 		{
 			double dxi = 1.0 / dx;
-			for (int j = 0; j < ng; j++)
-			{
+			for (int j = 0; j < ng; j++) {
 				E[j][t] = (phi[j] - phi[j + 1]) * dxi;
 			}
 			E[ng][t] = E[0][t];
 		}
 
-		 ael = 1;
-		//std::vector<double> a(ng + 1);
+		ael = 1;
 		for (int i = 0; i <= ng; i++) {
 			a[i] = E[i][t];
 		}
-
 	}
 
 	void accel(int nsp, double dx, double dt, int t, std::vector<double> q, std::vector<double> m, double& ael, std::vector<double>& a, int ng, std::vector<int> N, std::vector <std::vector<double>>& x, std::vector <std::vector<double>>& vx) {
 		/// ACCEL - Calculate force and advance velocity
 
-
 		for (int species = 0; species < nsp; species++) {
 
-			if (t == 0) {
+			if (t == 0)
 				q[species] = -0.5 * q[species];
-
-			}
 
 			double dxdt = dx / dt;
 			double ae = (q[species] / m[species]) * (dt / dxdt);
@@ -595,12 +524,8 @@ public:
 	}
 
 	void move(int nsp, std::vector<double>& rho, std::vector<std::vector<double>> rho0, std::vector<double> qdx, std::vector<int> N, std::vector <std::vector<double>>& x, std::vector <std::vector<double>>& vx, int ng) {
-
-
 		//MOVE - Advances position one time step and accumulates charge density.
-
-		for (int species = 0; species < nsp; species++)
-		{
+		for (int species = 0; species < nsp; species++) {
 			// Clear out old charge density.
 			for (int j = 1; j <= ng; j++) {
 				rho[j] = rho0[species][j];
@@ -609,43 +534,41 @@ public:
 		}
 
 		for (int species = 0; species < nsp; species++) {
-
 			for (int i = 0; i < N[species]; i++) {
 
-					x[species][i] += vx[species][i];
-					if (x[species][i] < 0) {
-						x[species][i] += ng;
-					}
-					if (x[species][i] >= ng) {
-						x[species][i] -= ng;
-					}
-					int j = floor(x[species][i]);
-					double drho = qdx[species] * (x[species][i] - j);
-					rho[j] = rho[j] - drho + qdx[species];
-					rho[j + 1] = rho[j + 1] + drho;
+				x[species][i] += vx[species][i];
+
+				if (x[species][i] < 0)
+					x[species][i] += ng;
+
+				if (x[species][i] >= ng)
+					x[species][i] -= ng;
+
+
+				int j = floor(x[species][i]);
+				double drho = qdx[species] * (x[species][i] - j);
+				rho[j] = rho[j] - drho + qdx[species];
+				rho[j + 1] = rho[j + 1] + drho;
 			}
 		}
 
 	}
+	//void retRho() {
+	//	double qdx = q / dx;
+	//	std::vector<double> rho(ng + 1, 0.0); // charge density at the spatial grid points
+	//	std::vector<std::vector<double>> rhos(ng + 1, std::vector<double>(nsp, 0.0));
+	//	std::vector<std::vector<double>> rho0(ng + 1, std::vector<double>(nsp, 0.0));
+	//	std::vector<std::vector<double>> qjdata(maxN, std::vector<double>(nsp, 0.0));
+	//	std::vector<std::vector<double>> qjp1data(maxN, std::vector<double>(nsp, 0.0));
+	//	std::vector<std::vector<double>> drhodata(maxN, std::vector<double>(nsp, 0.0));
+	//}
 
-
-std::vector<double> linspace(double start, double end, int num_points) {
-	std::vector<double> result(num_points);
-	double step = (end - start) / (num_points - 1);
-	for (int i = 0; i < num_points; ++i) {
-		result[i] = start + i * step;
+	std::vector<double> linspace(double start, double end, int num_points) {
+		std::vector<double> result(num_points);
+		double step = (end - start) / (num_points - 1);
+		for (int i = 0; i < num_points; ++i) {
+			result[i] = start + i * step;
+		}
+		return result;
 	}
-	return result;
-}
-
-//void retRho() {
-//	double qdx = q / dx;
-//	std::vector<double> rho(ng + 1, 0.0); // charge density at the spatial grid points
-//	std::vector<std::vector<double>> rhos(ng + 1, std::vector<double>(nsp, 0.0));
-//	std::vector<std::vector<double>> rho0(ng + 1, std::vector<double>(nsp, 0.0));
-//	std::vector<std::vector<double>> qjdata(maxN, std::vector<double>(nsp, 0.0));
-//	std::vector<std::vector<double>> qjp1data(maxN, std::vector<double>(nsp, 0.0));
-//	std::vector<std::vector<double>> drhodata(maxN, std::vector<double>(nsp, 0.0));
-
-//}
 };
