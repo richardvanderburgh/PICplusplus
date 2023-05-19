@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simulation GUI</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h1>Simulation GUI</h1>
+  <form id="simulation-form">
+    <label for="param1">Parameter 1:</label>
+    <input type="text" id="param1" name="param1" required>
+    <br>
+    <label for="param2">Parameter 2:</label>
+    <input type="text" id="param2" name="param2" required>
+    <br>
+    <input type="submit" value="Run Simulation">
+  </form>
+  <div id="result"></div>
+
+  <script>
+    $(document).ready(function() {
+      $('#simulation-form').submit(function(event) {
+        event.preventDefault(); // Prevent form submission
+
+        // Get form data
+        var param1 = $('#param1').val();
+        var param2 = $('#param2').val();
+
+        // Make AJAX request to the API endpoint
+        $.ajax({
+          url: 'http://127.0.0.1:8000/run-simulation/',  // Replace with your API endpoint URL
+          method: 'GET',
+          data: {param1: param1, param2: param2},
+          success: function(response) {
+            // Display the result
+            $('#result').text(response);
+          },
+          error: function(xhr, textStatus, errorThrown) {
+            // Handle error
+            console.log('Error:', textStatus);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+
