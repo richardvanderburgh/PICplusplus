@@ -3,13 +3,29 @@ project(PIC++Main)
 
 add_subdirectory(lib)
 
+# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/build)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+# find_package(FFTW3 REQUIRED)
+# find_package(nlohmann_json REQUIRED)
+
 add_executable(${CMAKE_PROJECT_NAME} 
 src/main.cpp
 )
 
+target_include_directories(${PROJECT_NAME} PUBLIC
+	${CONAN_INCLUDE_DIRS}
+)
+
 target_link_libraries( ${CMAKE_PROJECT_NAME} 
 PUBLIC
+ ${CONAN_LIBS}
 
 PIC++Lib
 )
 
+
+# boost/1.76.0
+# eigen/3.4.0
+# fftw/3.3.10

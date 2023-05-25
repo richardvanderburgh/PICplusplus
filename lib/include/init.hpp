@@ -10,6 +10,9 @@
 #include <vector>
 
 #include "fft.hpp"
+#include <fftw3.h>
+#include <nlohmann/json.hpp>
+
 
 class Init {
 public:
@@ -408,6 +411,12 @@ public:
 			testV1.emplace_back(1);
 			testV2.emplace_back(1);
 
+			nlohmann::json data;
+			data["positions"] = x[0];
+			data["velocities"] = vx[0];
+
+			std::cout << data.dump() << std::endl;
+
 			// Create a scatter plot 
 			matplot::scatter(x[0], vx[0], 1);
 			matplot::hold(true);
@@ -455,6 +464,13 @@ public:
 
 		complex complexPhi[ng];
 		CFFT::Inverse(complexPhik, complexPhi, ng);
+
+		// Perform FFT using FFTW
+		std::vector<std::complex<double>> output(ng);
+		fftw_plan plan = fftw_plan_dft_r2c_1d(ng, rho.data(), reinterpret_cast<fftw_complex*>(output.data()), FFTW_ESTIMATE);
+		fftw_execute(plan);
+		fftw_destroy_plan(plan);
+
 
 		for (int i = 0; i < ng; i++) {
 			phi[i] = -complexPhi[i].re();
