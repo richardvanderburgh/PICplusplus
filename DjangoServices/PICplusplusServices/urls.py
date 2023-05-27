@@ -19,7 +19,6 @@ from django.urls import path
 from .views import simulation_endpoint
 from .views import run_simulation
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]

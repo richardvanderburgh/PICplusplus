@@ -10,6 +10,8 @@
 #include <vector>
 
 #include "fft.hpp"
+#include <boost/algorithm/algorithm.hpp>
+
 #include <fftw3.h>
 #include <nlohmann/json.hpp>
 
@@ -24,7 +26,7 @@ public:
 		// Input Variables
 		double L = 6.28318530717958; // Physical length of system in meters
 		int nsp = 2; // Number of particle species
-		int nt = 600;//600; // Number of time steps
+		int nt = 1;//600; // Number of time steps
 		double dt = .1; // Time step in seconds
 		int epsi = 1; // 1 over epsilon naught(F / m) Epsilon normalized to 1
 		const int ng = 32; // Number of spatial grid points - only change the power of 2
@@ -45,7 +47,7 @@ public:
 		int nplot = 30; // ? ?
 
 		// //Species Input Variables
-		std::vector<int> N = { 100, 100 }; // Number of simulation particles
+		std::vector<int> N = { 30, 30 }; // Number of simulation particles
 		std::array<int, 2> wp = { 1, 1 }; // Plasma Frequency
 		std::array<int, 2> wc = { 0, 0 }; // Cyclotron frequency
 		std::array<int, 2> qm = { -1, -1 }; // q / m charge to mass ratio(C / kg)
@@ -397,7 +399,7 @@ public:
 
 		//BEGIN TIME LOOP //////////////////////////////////////////////////////////////////
 		// Create a figure and set the x and y limits
-		matplot::figure("Animation");
+		//matplot::figure("Animation");
 
 		for (int t = 1; t <= nt; t++) {
 
@@ -417,14 +419,14 @@ public:
 
 			std::cout << data.dump() << std::endl;
 
-			// Create a scatter plot 
-			matplot::scatter(x[0], vx[0], 1);
-			matplot::hold(true);
-			matplot::scatter(x[1], vx[1], 1);
+			//// Create a scatter plot 
+			//matplot::scatter(x[0], vx[0], 1);
+			//matplot::hold(true);
+			//matplot::scatter(x[1], vx[1], 1);
 
-			matplot::show();
-			matplot::hold(false);
-			std::cout << "t = " << t << std::endl;
+			//matplot::show();
+			//matplot::hold(false);
+			//std::cout << "t = " << t << std::endl;
 		}
 	}
 	void fields(std::vector<double>& rho, double L, int iw, double dx, std::vector<std::vector<double>>& E, int t, const int constNg, std::vector<double>& a, double ael)

@@ -19,7 +19,11 @@ def simulation_endpoint(request):
 def run_simulation(request):
     # Run the C++ executable
     try:
-        subprocess.run(["C:\\Users\\vande\\Programming\\PICplusplus\\build\\Debug\\PIC++Main.exe"])
-        return HttpResponse("C++ program executed successfully.")
+        executablePath = "C:\\Users\\vande\\Programming\\PICplusplus\\build\\bin\\PIC++Main.exe"
+        result = subprocess.run([executablePath], capture_output=True, text=True)
+        output = result.stdout.strip()
+
+        return JsonResponse(output, safe=False)
+        #return HttpResponse("C++ program executed successfully.")
     except Exception as e:
         return HttpResponse(f"Error executing C++ program: {str(e)}")
