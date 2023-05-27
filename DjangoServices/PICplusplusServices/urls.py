@@ -16,7 +16,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import simulation_endpoint
 from .views import run_simulation
 
 urlpatterns = [
@@ -24,7 +23,5 @@ urlpatterns = [
 ]
 
 urlpatterns = [
-    # path('api/simulation/', simulation_endpoint, name='simulation'),
-        # path('', run_simulation, name='run_simulation'),  # Empty path matches the root URL
         path('run-simulation/', run_simulation, name='run_simulation'),
 ]

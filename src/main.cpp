@@ -6,14 +6,22 @@
 //#include <nlohmann/json.hpp>
 
 
-int main() {
+int main(int argc, char* argv[]) {
 
 	//inputFile myInput;
 
 	//std::cout << myInput;
 
+	//for (int i = 0; i < argc; ++i)
+	//	std::cout << argv[i] << "\n";
+
 	Init init;
-	init.initialize();
+
+	int N1 = atoi(argv[1]);
+	int nt = atoi(argv[2]);
+
+
+	init.initialize(N1);
 
 	return 0;
 }

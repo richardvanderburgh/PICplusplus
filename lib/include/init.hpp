@@ -18,7 +18,7 @@
 
 class Init {
 public:
-	void initialize() {
+	void initialize(int N1) {
 		//int ng, int nt, double L, double dt, std::vector<int> N, int nsp, std::vector<double> qm, std::vector<double> wp, std::vector<double> wc, int mplot
 		// 
 		// FIRST EE - Set initial input values
@@ -47,7 +47,7 @@ public:
 		int nplot = 30; // ? ?
 
 		// //Species Input Variables
-		std::vector<int> N = { 30, 30 }; // Number of simulation particles
+		std::vector<int> N = { N1, 1 }; // Number of simulation particles
 		std::array<int, 2> wp = { 1, 1 }; // Plasma Frequency
 		std::array<int, 2> wc = { 0, 0 }; // Cyclotron frequency
 		std::array<int, 2> qm = { -1, -1 }; // q / m charge to mass ratio(C / kg)

@@ -1,26 +1,20 @@
 from django.http import JsonResponse
 import subprocess
 from django.http import HttpResponse
+import json
 
-def simulation_endpoint(request):
-    # Access request data
-    param1 = request.GET.get('param1')
-    param2 = request.GET.get('param2')
-
-    # Execute C++ simulation or related logic
-    # ...
-
-    # Format and return the response
-    response = {
-        #'result': result,
-        'message': 'Simulation executed successfully.'
-    }
-    return JsonResponse(response)
 def run_simulation(request):
+    if request.method == 'GET':
+        param1 = request.GET.get('param1')
+        param2 = request.GET.get('param2')
+    else:
+        param1 = request.POST.get('param1')
+        param2 = request.POST.get('param2')
+
     # Run the C++ executable
     try:
         executablePath = "C:\\Users\\vande\\Programming\\PICplusplus\\build\\bin\\PIC++Main.exe"
-        result = subprocess.run([executablePath], capture_output=True, text=True)
+        result = subprocess.run([executablePath, param1, param2], capture_output=True, text=True)
         output = result.stdout.strip()
 
         return JsonResponse(output, safe=False)

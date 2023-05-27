@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Simulation GUI</title>
+  <title>PIC++</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-  <h1>Simulation GUI</h1>
+  <h1>PIC++</h1>
   <form id="simulation-form">
     <label for="param1">Parameter 1:</label>
     <input type="text" id="param1" name="param1">
@@ -114,16 +114,6 @@ var yAxis = d3.axisLeft(yScale);
 g.append('g')
   .call(yAxis);
 
-// Create circles for each data point
-g.selectAll('circle')
-  .data(data)
-  .enter()
-  .append('circle')
-  .attr('cx', function(d) { return xScale(d.x); })
-  .attr('cy', function(d) { return yScale(d.y); })
-  .attr('r', 5)
-  .style('fill', 'steelblue');
-
 // Add border to the graph
 svg.append('rect')
   .attr('x', margin.left)
@@ -153,49 +143,6 @@ svg.append('text')
           error: function(xhr, textStatus, errorThrown) {
             // Handle error
             console.log('Error:', textStatus);
-            
-
-    //                     // Create scales for x and y axes
-    // var xScale = d3.scaleLinear()
-    //                .domain([0, d3.max(jsonData, function(d) { return d.x; })])
-    //                .range([0, width]);
-
-    // var yScale = d3.scaleLinear()
-    //                .domain([0, d3.max(data, function(d) { return d.y; })])
-    //                .range([height, 0]);
-
-        // Perform data binding and create visual elements
-        // var circles = svg.selectAll('circle')
-        //                  .data(jsonData)
-        //                  .enter()
-        //                  .append('circle')
-        //                  .attr('cx', function(d) { return d.x; })
-        //                  .attr('cy', function(d) { return d.y; })
-        //                  .attr('r', function(d) { return d.radius; })
-        //                  .style('fill', function(d) { return d.color; });
-
-        // Add any additional d3.js code to customize the visualization
-            // Create circles for each data point
-    // svg.selectAll('circle')
-    //    .data(jsonData)
-    //    .enter()
-    //    .append('circle')
-    //    .attr('cx', function(d) { return xScale(d.x); })
-    //    .attr('cy', function(d) { return yScale(d.y); })
-    //    .attr('r', 5)
-    //    .style('fill', 'blue');
-    //        // Add x-axis
-    // svg.append('g')
-    //    .attr('transform', 'translate(0,' + height + ')')
-    //    .call(d3.axisBottom(xScale));
-
-    // // Add y-axis
-    // svg.append('g')
-    //    .call(d3.axisLeft(yScale));
-    //       },
-    //       error: function(xhr, textStatus, errorThrown) {
-            // Handle error
-            // console.log('Error:', textStatus);
           }
         });
       });
@@ -223,64 +170,3 @@ svg.append('text')
   </style>
 </body>
 </html>
-
- <!-- <!DOCTYPE html>
- <html>
- <head>
-   <title>Simulation GUI</title>
-   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
- </head>
- <body>
-   <h1>Simulation GUI</h1>
-   <form id="simulation-form">
-     <label for="param1">Parameter 1:</label>
-     <input type="text" id="param1" name="param1" required>
-     <br>
-     <label for="param2">Parameter 2:</label>
-     <input type="text" id="param2" name="param2" required>
-     <br>
-     <input type="submit" value="Run Simulation">
-   </form>
-   <div id="result"></div>
- 
-   <script>
-     $(document).ready(function() {
-       $('#simulation-form').submit(function(event) {
-         event.preventDefault(); // Prevent form submission
- 
-         // Get form data
-         var param1 = $('#param1').val();
-         var param2 = $('#param2').val();
- 
-       // Make AJAX request to the API endpoint
-$.ajax({
-  url: 'http://127.0.0.1:8000/run-simulation/',  // Replace with your API endpoint URL
-  method: 'GET',
-  data: {param1: param1, param2: param2},
-  success: function(response) {
-    // Parse JSON response
-    var jsonData = JSON.parse(response);
-    console.log(jsonData);
-    
-    // Format and display the result
-    var resultHtml = '<h2>Simulation Result</h2>';
-    
-    // Iterate over the data and create dynamic HTML elements
-    Object.keys(jsonData).forEach(function(key) {
-      resultHtml += '<p>' + key + ': ' + jsonData[key] + '</p>';
-    });
-    
-    // Add the result to the 'result' div
-    $('#result').html(resultHtml);
-  },
-  error: function(xhr, textStatus, errorThrown) {
-    // Handle error
-    console.log('Error:', textStatus);
-  }
-});
-       });
-     });
-   </script>
- </body>
- </html> -->
- 
