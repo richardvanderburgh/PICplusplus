@@ -8,12 +8,6 @@
 
 int main(int argc, char* argv[]) {
 
-	//inputFile myInput;
-
-	//std::cout << myInput;
-
-	//for (int i = 0; i < argc; ++i)
-	//	std::cout << argv[i] << "\n";
 
 	Init init;
 
@@ -21,7 +15,7 @@ int main(int argc, char* argv[]) {
 	int nt = atoi(argv[2]);
 
 
-	init.initialize(N1);
+	init.initialize(N1, nt);
 
 	return 0;
 }

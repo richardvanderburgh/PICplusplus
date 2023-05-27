@@ -18,7 +18,21 @@
 
 class Init {
 public:
-	void initialize(int N1) {
+
+	
+	struct FrameData {
+
+		std::vector<std::vector<double>> xData;
+		std::vector<std::vector<double>> vxData;
+	};
+
+	struct PicData {
+
+		std::vector<FrameData> frameData;
+
+	};
+
+	void initialize(int N1, int nt) {
 		//int ng, int nt, double L, double dt, std::vector<int> N, int nsp, std::vector<double> qm, std::vector<double> wp, std::vector<double> wc, int mplot
 		// 
 		// FIRST EE - Set initial input values
@@ -26,7 +40,7 @@ public:
 		// Input Variables
 		double L = 6.28318530717958; // Physical length of system in meters
 		int nsp = 2; // Number of particle species
-		int nt = 1;//600; // Number of time steps
+		//int nt = 5;//600; // Number of time steps
 		double dt = .1; // Time step in seconds
 		int epsi = 1; // 1 over epsilon naught(F / m) Epsilon normalized to 1
 		const int ng = 32; // Number of spatial grid points - only change the power of 2
@@ -401,23 +415,26 @@ public:
 		// Create a figure and set the x and y limits
 		//matplot::figure("Animation");
 
+		PicData picData;
+		nlohmann::json frames;
+
 		for (int t = 1; t <= nt; t++) {
 
 			accel(nsp, dx, dt, t, q, m, ael, a, ng, N, x, vx);
 			move(nsp, rho, rho0, qdx, N, x, vx, ng);
 			fields(rho, L, iw, dx, E, t, ng, a, ael);
 
-			std::vector<double> testV1;
-			std::vector<double> testV2;
+			FrameData frameData;
+			frameData.xData = x;
+			frameData.vxData = vx;
 
-			testV1.emplace_back(1);
-			testV2.emplace_back(1);
+			nlohmann::json frame;
+			frame["positions"] = x[0];
+			frame["velocities"] = vx[0];
+			frames.push_back(frame);
 
-			nlohmann::json data;
-			data["positions"] = x[0];
-			data["velocities"] = vx[0];
+			picData.frameData.push_back(frameData);
 
-			std::cout << data.dump() << std::endl;
 
 			//// Create a scatter plot 
 			//matplot::scatter(x[0], vx[0], 1);
@@ -428,6 +445,7 @@ public:
 			//matplot::hold(false);
 			//std::cout << "t = " << t << std::endl;
 		}
+			std::cout << frames.dump() << std::endl;
 	}
 	void fields(std::vector<double>& rho, double L, int iw, double dx, std::vector<std::vector<double>>& E, int t, const int constNg, std::vector<double>& a, double ael)
 	{
