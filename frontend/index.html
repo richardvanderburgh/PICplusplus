@@ -1,151 +1,226 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+  <meta charset="UTF-8">
   <title>PIC++</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
+
 <body>
   <h1>PIC++</h1>
   <form id="simulation-form">
     <label for="param1">Number of Electrons:</label>
-    <input type="text" id="param1" name="param1">
+    <input type="text" id="param1" name="param1" value="50">
     <br>
     <label for="param2">Time Steps:</label>
-    <input type="text" id="param2" name="param2">
+    <input type="text" id="param2" name="param2" value="50">
+    <br>
+    <label for="param3">Frame Duration (ms):</label>
+    <input type="text" id="param3" name="param3" value="100">
     <br>
     <input type="submit" value="Run Simulation">
   </form>
   <div id="result"></div>
   <div id="visualization"></div>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  
+  <!-- Animation Controls -->
+  <div id="controls">
+    <button id="play-button" class="control-button">Play</button>
+    <button id="stop-button" class="control-button">Stop</button>
+    <input type="range" id="frame-slider" step="1" value="0">
+    <button id="show-frame-button" class="control-button">Show Frame</button>
+  </div>
+
   <script>
-    $(document).ready(function() {
-      $('#simulation-form').submit(function(event) {
+    $(document).ready(function () {
+      var jsonData;
+      var positions;
+      var width = 800;
+      var height = 400;
+      var margin = { top: 20, right: 20, bottom: 30, left: 40 };
+
+      var ng = 32;
+
+      var svg = d3.select('#visualization')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+      var xScale = d3.scaleLinear()
+        .domain([-5, ng + 5])
+        .range([0, width]);
+
+      var yMin = -50;
+      var yMax = 50;
+
+      var yScale = d3.scaleLinear()
+        .domain([yMin, yMax])
+        .range([height, 0]);
+
+      // Add axes
+      const xAxis = d3.axisBottom(xScale);
+      const yAxis = d3.axisLeft(yScale);
+
+      svg.append('g')
+        .attr('transform', 'translate(0, 370)')
+        .call(xAxis);
+
+      svg.append('g')
+        .attr('transform', 'translate(40, 0)')
+        .call(yAxis);
+
+      // Calculate the inner width and height (excluding margins)
+      var innerWidth = width - margin.left - margin.right;
+      var innerHeight = height - margin.top - margin.bottom;
+
+      // Create a group element for the main content and apply margins
+      var g = svg.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+      // Add border to the graph
+      svg.append('rect')
+        .attr('x', margin.left)
+        .attr('y', margin.top)
+        .attr('width', innerWidth)
+        .attr('height', innerHeight)
+        .style('fill', 'none')
+        .style('stroke', 'black')
+        .style('stroke-width', '1px');
+
+      // Add x-axis label
+      svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', height)
+        .style('text-anchor', 'middle')
+        .text('Positions');
+
+      // Add y-axis label
+      svg.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('x', -height / 2)
+        .attr('y', 15)
+        .style('text-anchor', 'middle')
+        .text('Velocities');
+
+      $('#simulation-form').submit(function (event) {
         event.preventDefault(); // Prevent form submission
 
-        // Get form data
+        // Get form datak
         var param1 = $('#param1').val();
         var param2 = $('#param2').val();
+        var duration = $('#param3').val();
+
+        document.getElementById('frame-slider').max = param2 - 1;
 
         // Make AJAX request to the API endpoint
         $.ajax({
           url: 'http://127.0.0.1:8000/run-simulation/',  // Replace with your API endpoint URL
           method: 'GET',
-          data: {param1: param1, param2: param2},
-          success: function(response) {
-            // Display the result
-            // $('#result').text(response);
-            // console.log(response);
+          data: { param1: param1, param2: param2 },
+          success: function (response) {
+            var framesData = JSON.parse(response);
 
-            // Parse JSON response
-        var jsonData = JSON.parse(response);
-        console.log(jsonData);
-
-           // Set the width and height of the visualization
-var width = 800;
-var height = 400;
-var margin = { top: 20, right: 20, bottom: 30, left: 40 };
-
-// Create an SVG element within the 'visualization' container
-var svg = d3.select('#visualization')
-  .append('svg')
-  .attr('width', width)
-  .attr('height', height);
-
-// Extract positions and velocities from the JSON data
-var positions = jsonData[0].positions;
-var velocities = jsonData[0].velocities;
-
-// Combine positions and velocities into a single array of objects
-var data = positions.map(function(position, index) {
-  return { x: position, y: velocities[index] };
-});
-
-// Define the x-scale for positions
-var xScale = d3.scaleLinear()
-  .domain([d3.min(positions), d3.max(positions)])
-  .range([0, width]);
-
-// Define the y-scale for velocities
-var yMin = -1;
-var yMax = 1;
-var yScale = d3.scaleLinear()
-  // .domain([d3.min(velocities), d3.max(velocities)])
-  .domain([yMin, yMax])
-  .range([height, 0]);
-
-// Create circles for each data point
-svg.selectAll('circle')
-  .data(data)
-  .enter()
-  .append('circle')
-  .attr('cx', function(d) { return xScale(d.x); })
-  .attr('cy', function(d) { return yScale(d.y); })
-  .attr('r', 5)
-  .style('fill', 'steelblue');
-
-  // Calculate the inner width and height (excluding margins)
-var innerWidth = width - margin.left - margin.right;
-var innerHeight = height - margin.top - margin.bottom;
-
-// Create a group element for the main content and apply margins
-var g = svg.append('g')
-  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-// Define the x-scale for positions
-var xScale = d3.scaleLinear()
-  .domain([d3.min(positions), d3.max(positions)])
-  .range([0, innerWidth]);
-
-// Define the y-scale for velocities
-var yScale = d3.scaleLinear()
-  .domain([yMin, yMax])
-  .range([innerHeight, 0]);
-
-// Create x-axis
-var xAxis = d3.axisBottom(xScale);
-g.append('g')
-  .attr('transform', 'translate(0,' + innerHeight + ')')
-  .call(xAxis);
-
-// Create y-axis
-var yAxis = d3.axisLeft(yScale);
-g.append('g')
-  .call(yAxis);
-
-// Add border to the graph
-svg.append('rect')
-  .attr('x', margin.left)
-  .attr('y', margin.top)
-  .attr('width', innerWidth)
-  .attr('height', innerHeight)
-  .style('fill', 'none')
-  .style('stroke', 'black')
-  .style('stroke-width', '1px');
-
-// Add x-axis label
-svg.append('text')
-  .attr('x', width / 2)
-  .attr('y', height - 5)
-  .style('text-anchor', 'middle')
-  .text('Positions');
-
-// Add y-axis label
-svg.append('text')
-  .attr('transform', 'rotate(-90)')
-  .attr('x', -height / 2)
-  .attr('y', 15)
-  .style('text-anchor', 'middle')
-  .text('Velocities');
-
+            startAnimation(framesData, duration);
           },
-          error: function(xhr, textStatus, errorThrown) {
-            // Handle error
+          error: function (xhr, textStatus, errorThrown) {
             console.log('Error:', textStatus);
           }
         });
       });
+
+      function showFrame(framesData, frameIndex) {
+        document.getElementById('frame-slider').value = frameIndex;
+          animate(framesData[frameIndex]);
+        }
+
+      function startAnimation(framesData, duration) {
+
+        var frameIndex = 0;
+        createElements(framesData[frameIndex]); // Create initial circle and text elements
+
+        var frames = framesData.map(function (frameData) {
+          return frameData.positions.map(function (position, index) {
+            return { x: position, y: frameData.velocities[index] };
+          });
+        });
+
+        animate(framesData[frameIndex]);
+
+        var frameSlider = document.getElementById('frame-slider');
+        frameSlider.addEventListener('input', function () {
+          var frameIndex = parseInt(frameSlider.value);
+          showFrame(framesData, frameIndex);
+        });
+
+        var playButton = document.getElementById('play-button');
+        var stopButton = document.getElementById('stop-button');
+
+        playButton.addEventListener('click', function () {
+          playAnimation(framesData, duration);
+        });
+
+        stopButton.addEventListener('click', function () {
+          stopAnimation();
+        });
+      }
+
+      // Variables to store the animation state
+      var animationInterval;
+      var currentFrameIndex = 0;
+
+      function playAnimation(framesData, duration) {
+        // Clear any existing animation interval
+        stopAnimation();
+
+        animationInterval = setInterval(function () {
+          currentFrameIndex = (currentFrameIndex + 1) % framesData.length;
+          showFrame(framesData, currentFrameIndex);
+        }, duration); // Adjust the duration as needed
+      }
+
+      function stopAnimation() {
+        clearInterval(animationInterval);
+      }
+
+      function createElements(frame) {
+
+        // Create circles for each data point
+        svg.selectAll('circle')
+          .data(frame)
+          .enter()
+          .append('circle')
+          .attr('cx', function (d) { return xScale(d.x); })
+          .attr('cy', function (d) { return yScale(d.y); })
+          .attr('r', 5)
+          .style('fill', 'steelblue');
+      }
+
+      function animate(frame) {
+        // Select the circles and bind the data
+        // Combine positions and velocities into a single array of objects
+        var data = frame.positions.map(function (position, index) {
+          return { x: position, y: frame.velocities[index] };
+        });
+
+        var circles = d3.select('svg')
+          .selectAll('circle')
+          .data(data);
+
+        // // Update the position of the circles
+        circles.attr('cx', function (d) { return xScale(d.x); })
+          .attr('cy', function (d) { return yScale(d.y); })
+
+        // Create circles for each data point
+        svg.selectAll('circle')
+          .data(data)
+          .enter()
+          .append('circle')
+          .attr('cx', function (d) { return xScale(d.x); })
+          .attr('cy', function (d) { return yScale(d.y); })
+          .attr('r', 5)
+          .style('fill', 'steelblue');
+      }
     });
   </script>
   <style>
@@ -167,6 +242,17 @@ svg.append('text')
       background-color: lightgray;
       padding: 10px;
     }
+
+    /* CSS styling for the controls */
+    .control-button {
+      margin-right: 10px;
+    }
+
+    #frame-slider {
+      width: 400px;
+      margin-top: 10px;
+    }
   </style>
 </body>
+
 </html>
