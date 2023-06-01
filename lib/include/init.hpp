@@ -17,32 +17,25 @@
 #include "Accel.hpp"
 #include "Fields.hpp"
 #include "SetRho.hpp"
+#include "Utils.hpp"
 
 class Init {
 public:
 
-	struct SpeciesData {
-
-		int speciesIndex;
-		std::vector<double> positions;
-		std::vector<double> velocities;
+	struct Particle {
+		double position;
+		double velocity;
+		int species;
+		int id;
 	};
 
-	//struct ParticalData {
-	//	double position;
-	//	double velocity;
-	//	std::string species;
-	//	int id;
-	//};
-
-	struct FrameData {
-		//std::vector <ParticalData> speciesData;
-		std::vector <SpeciesData> speciesData;
-
+	struct Frame {
+		std::vector<Particle> particles;
+		int frameNumber;
 	};
 
 	struct PicData {
-		std::vector<FrameData> frameData;
+		std::vector<Frame> frames;
 	};
 
 	void initialize(int N1, int nt) {
@@ -373,10 +366,9 @@ public:
 		accel(nsp, dx, dt, t, q, m, ael, a, ng, N, x, vx);
 
 		//BEGIN TIME LOOP //////////////////////////////////////////////////////////////////
-		// Create a figure and set the x and y limits
 		//matplot::figure("Animation");
 
-		//PicData picData;
+		nlohmann::json JSON;
 		nlohmann::json frames;
 
 		for (int t = 1; t <= nt; t++) {
@@ -385,38 +377,41 @@ public:
 			move(nsp, rho, rho0, qdx, N, x, vx, ng);
 			fields(rho, L, iw, dx, E, t, ng, a, ael);
 
-			FrameData frameData;
-
-			// Store the data for the current frame (for all species)
-			for (int sp = 0; sp < nsp; sp++) {
-				SpeciesData speciesData;
-				speciesData.speciesIndex = sp;
-				speciesData.positions = x[sp];
-				speciesData.velocities = vx[sp];
-				frameData.speciesData.push_back(speciesData);
-			}
-
-			nlohmann::json speciesArray;
-			for (const auto& species : frameData.speciesData) {
-				nlohmann::json speciesObject;
-				speciesObject["speciesIndex"] = species.speciesIndex;
-				speciesObject["positions"] = species.positions;
-				speciesObject["velocities"] = species.velocities;
-				speciesArray.push_back(speciesObject);
-			}
+			//Frame frame;
 
 			nlohmann::json frame;
-			//nlohmann::json particle;
-			for (const auto& species : frameData.speciesData) {
-				nlohmann::json speciesObject;
-				speciesObject["speciesIndex"] = species.speciesIndex;
-				speciesObject["positions"] = species.positions;
-				speciesObject["velocities"] = species.velocities;
-				speciesArray.push_back(speciesObject);
+			nlohmann::json particles;
+			int particleId = 0;
+
+			for (int species = 0; species < nsp; species++) {
+				for (int i = 0; i < N[species]; i++) {
+
+					Particle particle;
+
+
+					particle.id = particleId;
+					particle.position = x[species][i];
+					particle.velocity = vx[species][i];
+					particle.species = species;
+
+					//particles.push_back(particle);
+
+					nlohmann::json particleObject;
+
+					particleObject["position"] = x[species][i];
+					particleObject["velocity"] = vx[species][i];
+					particleObject["species"] = species;
+					particleObject["id"] = particleId;
+					
+					particles.push_back(particleObject);
+
+					particleId++;
+				}
 			}
 
-			frame["timeStep"] = t;  // Store the time step index
-			frame["speciesData"] = speciesArray;
+			frame["particles"] = particles;
+
+			frame["frameNumber"] = t;  
 
 			//nlohmann::json frame;
 			//frame["positions"] = x[0];
@@ -434,15 +429,9 @@ public:
 			//matplot::hold(false);
 			//std::cout << "t = " << t << std::endl;
 		}
-		std::cout << frames.dump() << std::endl;
-	}
-	
-	std::vector<double> linspace(double start, double end, int num_points) {
-		std::vector<double> result(num_points);
-		double step = (end - start) / (num_points - 1);
-		for (int i = 0; i < num_points; ++i) {
-			result[i] = start + i * step;
-		}
-		return result;
+		JSON["phaseFrames"] = frames;
+
+		std::cout << JSON.dump() << std::endl;
 	}
 };
+
