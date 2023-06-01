@@ -4,10 +4,13 @@ project(PIC++Lib)
 find_package(Matplot++ REQUIRED HINTS $ENV{MATPLOTPP_DIR})
 add_library(${PROJECT_NAME} STATIC
 
+include/Accel.hpp
 include/First_EE.hpp
+include/Fields.hpp
 include/init.hpp
 include/fft.hpp
 include/complex.hpp
+include/SetRho.hpp
 
 fft.cpp
 complex.cpp

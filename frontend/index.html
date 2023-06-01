@@ -12,7 +12,7 @@
   <h1>PIC++</h1>
   <form id="simulation-form">
     <label for="param1">Number of Electrons:</label>
-    <input type="text" id="param1" name="param1" value="50">
+    <input type="text" id="param1" name="param1" value="10">
     <br>
     <label for="param2">Time Steps:</label>
     <input type="text" id="param2" name="param2" value="50">
@@ -131,19 +131,19 @@
 
       function showFrame(framesData, frameIndex) {
         document.getElementById('frame-slider').value = frameIndex;
-          animate(framesData[frameIndex]);
-        }
+        animate(framesData[frameIndex]);
+      }
 
       function startAnimation(framesData, duration) {
 
         var frameIndex = 0;
         createElements(framesData[frameIndex]); // Create initial circle and text elements
 
-        var frames = framesData.map(function (frameData) {
-          return frameData.positions.map(function (position, index) {
-            return { x: position, y: frameData.velocities[index] };
-          });
-        });
+        // var frames = framesData.map(function (frameData) {
+        //   return frameData.positions.map(function (position, index) {
+        //     return { x: position, y: frameData.velocities[index] };
+        //   });
+        // });
 
         animate(framesData[frameIndex]);
 
@@ -184,42 +184,79 @@
       }
 
       function createElements(frame) {
+  // Remove any existing circles
+  svg.selectAll('circle').remove();
 
-        // Create circles for each data point
-        svg.selectAll('circle')
-          .data(frame)
-          .enter()
-          .append('circle')
-          .attr('cx', function (d) { return xScale(d.x); })
-          .attr('cy', function (d) { return yScale(d.y); })
-          .attr('r', 5)
-          .style('fill', 'steelblue');
-      }
+  frame.speciesData.forEach(function (species) {
+    // Create circles for each species
+    var circles = svg.selectAll('circle')
+      .data(species.positions)
+      .enter()
+      .append('circle')
+      .attr('r', 5)
 
+    // Update the attributes of each circle
+    circles.attr('cx', xScale(species.positions))
+      .attr('cy', yScale(species.velocities));
+  });
+}
+
+  // function animate(frame) {
+      //   // Select the circles and bind the data
+      //   // Combine positions and velocities into a single array of objects
+      //   var data = frame.positions.map(function (position, index) {
+      //     return { x: position, y: frame.velocities[index] };
+      //   });
+
+      //   var circles = d3.select('svg')
+      //     .selectAll('circle')
+      //     .data(data);
+
+      //   // // Update the position of the circles
+      //   circles.attr('cx', function (d) { return xScale(d.x); })
+      //     .attr('cy', function (d) { return yScale(d.y); })
+
+      //   // Create circles for each data point
+      //   svg.selectAll('circle')
+      //     .data(data)
+      //     .enter()
+      //     .append('circle')
+      //     .attr('cx', function (d) { return xScale(d.x); })
+      //     .attr('cy', function (d) { return yScale(d.y); })
+      //     .attr('r', 5)
+      //     .style('fill', 'steelblue');
+      // }
       function animate(frame) {
-        // Select the circles and bind the data
-        // Combine positions and velocities into a single array of objects
-        var data = frame.positions.map(function (position, index) {
-          return { x: position, y: frame.velocities[index] };
+        svg.selectAll('circle').remove();
+
+        // Iterate over each species in the frame
+        frame.speciesData.forEach(function (species) {
+          // Select the circles and bind the data
+          var circles = svg.selectAll('circle')
+            .data(species.positions);
+            console.log("speciesIndex: ", species.speciesIndex)
+
+          // Create circles for each position data point
+          circles.enter()
+            .append('circle')
+            .attr('cx', function (position) {
+              // console.log(position);
+              console.log("position:", position);
+
+              return xScale(position);
+            })
+            .attr('cy', function (velocity, index) {
+              console.log("velocity:", velocity);
+
+              return yScale(species.velocities[index]);
+            })
+            .attr('r', 5)
+            .style('fill', function (d) {
+              // console.log("speciesIndex: ", species.speciesIndex)
+              // Set different colors for different species
+              return species.speciesIndex === 0 ? 'steelblue' : 'red';
+            });
         });
-
-        var circles = d3.select('svg')
-          .selectAll('circle')
-          .data(data);
-
-        // // Update the position of the circles
-        circles.attr('cx', function (d) { return xScale(d.x); })
-          .attr('cy', function (d) { return yScale(d.y); })
-
-        // Create circles for each data point
-        svg.selectAll('circle')
-          .data(data)
-          .enter()
-          .append('circle')
-          .attr('cx', function (d) { return xScale(d.x); })
-          .attr('cy', function (d) { return yScale(d.y); })
-          .attr('r', 5)
-          .style('fill', 'steelblue');
       }
     });
   </script>
