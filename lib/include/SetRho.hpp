@@ -1,7 +1,13 @@
 #pragma once
 
 
-void retRho(int species, int ng, double dx, std::vector<int> N, std::vector<double> qdx, std::vector<double>& rho, std::vector<std::vector<double>> x, std::vector<std::vector<double>>& rho0, std::vector<std::vector<double>>& rhos, int iw) {
+void retRho(int species, int ng, double dx, 
+	std::vector<int> N, 
+	std::vector<double> qdx, 
+	std::vector<double>& rho, 
+	std::vector<std::vector<double>>& x, 
+	std::vector<std::vector<double>>& rho0, 
+	std::vector<std::vector<double>>& rhos, int iw) {
 
 	//double dxi;
 	double dxi = 1.0 / dx;

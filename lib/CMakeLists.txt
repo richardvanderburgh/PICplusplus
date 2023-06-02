@@ -11,6 +11,7 @@ include/init.hpp
 include/fft.hpp
 include/complex.hpp
 include/SetRho.hpp
+include/Utils.hpp
 
 fft.cpp
 complex.cpp

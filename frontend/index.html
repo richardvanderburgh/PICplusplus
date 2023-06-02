@@ -12,7 +12,7 @@
   <h1>PIC++</h1>
   <form id="simulation-form">
     <label for="param1">Number of Electrons:</label>
-    <input type="text" id="param1" name="param1" value="10">
+    <input type="text" id="param1" name="param1" value="50">
     <br>
     <label for="param2">Time Steps:</label>
     <input type="text" id="param2" name="param2" value="50">
@@ -22,7 +22,6 @@
     <br>
     <input type="submit" value="Run Simulation">
   </form>
-  <div id="result"></div>
   <div id="visualization"></div>
   <!-- Animation Controls -->
   <div id="controls">
@@ -36,9 +35,9 @@
     $(document).ready(function () {
       var jsonData;
       var positions;
-      var width = 800;
+      var width = 900;
       var height = 400;
-      var margin = { top: 20, right: 20, bottom: 30, left: 40 };
+      var margin = { top: 0, right: 20, bottom: 20, left: 40 };
 
       var ng = 32;
 
@@ -48,26 +47,36 @@
         .attr('height', height);
 
       var xScale = d3.scaleLinear()
-        .domain([-5, ng + 5])
-        .range([0, width]);
+        .domain([0, ng + 5])
+        .range([margin.left, width - margin.right]); // Define the range of the x-axis within the SVG container
 
-      var yMin = -50;
-      var yMax = 50;
+      var yMin = -30;
+      var yMax = 30;
 
       var yScale = d3.scaleLinear()
         .domain([yMin, yMax])
-        .range([height, 0]);
+        .range([height - margin.bottom, margin.top]); // Define the range of the y-axis within the SVG container
 
       // Add axes
       const xAxis = d3.axisBottom(xScale);
       const yAxis = d3.axisLeft(yScale);
 
-      svg.append('g')
-        .attr('transform', 'translate(0, 370)')
+      // Create a group element for the x-axis
+      svg.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0, ${height - margin.bottom})`)
+
+      // Create a group element for the y-axis
+      svg.append("g")
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${margin.left}, 0)`)
+
+      // Call the x-axis component
+      svg.select(".x-axis")
         .call(xAxis);
 
-      svg.append('g')
-        .attr('transform', 'translate(40, 0)')
+      // Call the y-axis component
+      svg.select(".y-axis")
         .call(yAxis);
 
       // Calculate the inner width and height (excluding margins)
@@ -119,16 +128,35 @@
           method: 'GET',
           data: { param1: param1, param2: param2 },
           success: function (response) {
-            var framesData = JSON.parse(response);
-
-            startAnimation(framesData, duration);
+            var PICData = JSON.parse(response);
+            console.log(PICData)
+            startAnimation(PICData.phaseFrames, duration);
           },
           error: function (xhr, textStatus, errorThrown) {
             console.log('Error:', textStatus);
           }
         });
       });
+      function getPositionsOfSpecies(frame, species) {
+        const positions = [];
 
+        for (const particle of frame.particles) {
+          if (particle.species === species) {
+            positions.push(particle.position);
+          }
+        }
+        return positions;
+      }
+      function getVelocitiesOfSpecies(frame, species) {
+        const velocities = [];
+
+        for (const particle of frame.particles) {
+          if (particle.species === species) {
+            velocities.push(particle.velocity);
+          }
+        }
+        return velocities;
+      }
       function showFrame(framesData, frameIndex) {
         document.getElementById('frame-slider').value = frameIndex;
         animate(framesData[frameIndex]);
@@ -137,14 +165,6 @@
       function startAnimation(framesData, duration) {
 
         var frameIndex = 0;
-        createElements(framesData[frameIndex]); // Create initial circle and text elements
-
-        // var frames = framesData.map(function (frameData) {
-        //   return frameData.positions.map(function (position, index) {
-        //     return { x: position, y: frameData.velocities[index] };
-        //   });
-        // });
-
         animate(framesData[frameIndex]);
 
         var frameSlider = document.getElementById('frame-slider');
@@ -161,17 +181,16 @@
         });
 
         stopButton.addEventListener('click', function () {
-          stopAnimation();
+          clearInterval(animationInterval);
         });
       }
 
-      // Variables to store the animation state
       var animationInterval;
       var currentFrameIndex = 0;
 
       function playAnimation(framesData, duration) {
-        // Clear any existing animation interval
-        stopAnimation();
+
+        clearInterval(animationInterval);
 
         animationInterval = setInterval(function () {
           currentFrameIndex = (currentFrameIndex + 1) % framesData.length;
@@ -179,84 +198,32 @@
         }, duration); // Adjust the duration as needed
       }
 
-      function stopAnimation() {
-        clearInterval(animationInterval);
-      }
-
-      function createElements(frame) {
-  // Remove any existing circles
-  svg.selectAll('circle').remove();
-
-  frame.speciesData.forEach(function (species) {
-    // Create circles for each species
-    var circles = svg.selectAll('circle')
-      .data(species.positions)
-      .enter()
-      .append('circle')
-      .attr('r', 5)
-
-    // Update the attributes of each circle
-    circles.attr('cx', xScale(species.positions))
-      .attr('cy', yScale(species.velocities));
-  });
-}
-
-  // function animate(frame) {
-      //   // Select the circles and bind the data
-      //   // Combine positions and velocities into a single array of objects
-      //   var data = frame.positions.map(function (position, index) {
-      //     return { x: position, y: frame.velocities[index] };
-      //   });
-
-      //   var circles = d3.select('svg')
-      //     .selectAll('circle')
-      //     .data(data);
-
-      //   // // Update the position of the circles
-      //   circles.attr('cx', function (d) { return xScale(d.x); })
-      //     .attr('cy', function (d) { return yScale(d.y); })
-
-      //   // Create circles for each data point
-      //   svg.selectAll('circle')
-      //     .data(data)
-      //     .enter()
-      //     .append('circle')
-      //     .attr('cx', function (d) { return xScale(d.x); })
-      //     .attr('cy', function (d) { return yScale(d.y); })
-      //     .attr('r', 5)
-      //     .style('fill', 'steelblue');
-      // }
       function animate(frame) {
         svg.selectAll('circle').remove();
 
-        // Iterate over each species in the frame
-        frame.speciesData.forEach(function (species) {
-          // Select the circles and bind the data
-          var circles = svg.selectAll('circle')
-            .data(species.positions);
-            console.log("speciesIndex: ", species.speciesIndex)
+        const numSpecies = 2;
+        for (let species = 0; species < numSpecies; species++) {
+          // console.log("inside")
+          positions = getPositionsOfSpecies(frame, species);
+          velocities = getVelocitiesOfSpecies(frame, species);
 
-          // Create circles for each position data point
+          // Create circles for each species
+          const circles = g.selectAll(`.species${species}`)
+            .data(positions);
+
+          // Update existing circles' positions
+          circles.attr('cx', (d, i) => xScale(positions[i]))
+            .attr('cy', (d, i) => yScale(velocities[i]));
+
+          // Create new circles for any new data points
           circles.enter()
             .append('circle')
-            .attr('cx', function (position) {
-              // console.log(position);
-              console.log("position:", position);
-
-              return xScale(position);
-            })
-            .attr('cy', function (velocity, index) {
-              console.log("velocity:", velocity);
-
-              return yScale(species.velocities[index]);
-            })
+            .attr('class', `species${species}`)
+            .attr('cx', (d, i) => xScale(positions[i]))
+            .attr('cy', (d, i) => yScale(velocities[i]))
             .attr('r', 5)
-            .style('fill', function (d) {
-              // console.log("speciesIndex: ", species.speciesIndex)
-              // Set different colors for different species
-              return species.speciesIndex === 0 ? 'steelblue' : 'red';
-            });
-        });
+            .style('fill', (d, i) => (species === 0 ? 'steelblue' : 'red'));
+        };
       }
     });
   </script>
