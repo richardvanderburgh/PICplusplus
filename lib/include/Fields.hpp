@@ -37,10 +37,10 @@ void fields(std::vector<double>& rho, double L, int iw, double dx, std::vector<s
 	CFFT::Inverse(complexPhik, complexPhi, ng);
 
 	// Perform FFT using FFTW
-	std::vector<std::complex<double>> output(ng);
-	fftw_plan plan = fftw_plan_dft_r2c_1d(ng, rho.data(), reinterpret_cast<fftw_complex*>(output.data()), FFTW_ESTIMATE);
-	fftw_execute(plan);
-	fftw_destroy_plan(plan);
+	//std::vector<std::complex<double>> output(ng);
+	//fftw_plan plan = fftw_plan_dft_r2c_1d(ng, rho.data(), reinterpret_cast<fftw_complex*>(output.data()), FFTW_ESTIMATE);
+	//fftw_execute(plan);
+	//fftw_destroy_plan(plan);
 
 
 	for (int i = 0; i < ng; i++) {
@@ -56,22 +56,22 @@ void fields(std::vector<double>& rho, double L, int iw, double dx, std::vector<s
 	if (iw == 1 || iw == 2)
 	{
 		for (int j = 1; j < ng; j++) {
-			E[j][t] = (phi[j - 1] - phi[j + 1]) / (2.0 * dx);
+			E[t][j] = (phi[j - 1] - phi[j + 1]) / (2.0 * dx);
 		}
-		E[0][t] = (phi[ng - 1] - phi[1]) / (2.0 * dx);
-		E[ng][t] = E[0][t];
+		E[t][0] = (phi[ng - 1] - phi[1]) / (2.0 * dx);
+		E[t][ng] = E[t][0];
 	}
 	else if (iw == 3)
 	{
 		double dxi = 1.0 / dx;
 		for (int j = 0; j < ng; j++) {
-			E[j][t] = (phi[j] - phi[j + 1]) * dxi;
+			E[t][j] = (phi[j] - phi[j + 1]) * dxi;
 		}
-		E[ng][t] = E[0][t];
+		E[t][ng] = E[t][0];
 	}
 
 	ael = 1;
 	for (int i = 0; i <= ng; i++) {
-		a[i] = E[i][t];
+		a[i] = E[t][i];
 	}
 }

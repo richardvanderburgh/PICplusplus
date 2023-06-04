@@ -31,14 +31,16 @@ public:
 
 	struct Frame {
 		std::vector<Particle> particles;
+		std::vector<double> electricField;
 		int frameNumber;
 	};
 
 	struct PicData {
 		std::vector<Frame> frames;
 	};
+	PicData mPicData;
 
-	void initialize(int N1, int nt, double dt) {
+	bool initialize(int N1, int nt, double dt) {
 		//int ng, int nt, double L, double dt, std::vector<int> N, int nsp, std::vector<double> qm, std::vector<double> wp, std::vector<double> wc, int mplot
 		// 
 		// FIRST EE - Set initial input values
@@ -146,12 +148,12 @@ public:
 		double bx0 = b0 * costh;
 		double by0 = b0 * sinth;
 
-		std::vector<std::vector<double>> E(ng + 1, std::vector<double>(nt + 1, 0.0));
+		std::vector<std::vector<double>> E(nt + 1, std::vector<double>(ng + 1, 0.0));
 
 		// Initialize all elements of the array to zero
 		for (int i = 0; i < ng + 1; i++) {
 			for (int j = 0; j < nt + 1; j++) {
-				E[i][j] = 0.0;
+				E[j][i] = 0.0;
 			}
 		}
 		// --Field Initialization --
@@ -365,22 +367,24 @@ public:
 		fields(rho, L, iw, dx, E, t, ng, a, ael);
 		accel(nsp, dx, dt, t, q, m, ael, a, ng, N, x, vx);
 
-		//BEGIN TIME LOOP //////////////////////////////////////////////////////////////////
-		//matplot::figure("Animation");
+		//BEGIN TIME LOOP 
 
 		nlohmann::json JSON;
 		nlohmann::json frames;
 
 		for (int t = 1; t <= nt; t++) {
+			Frame frame;
 
 			accel(nsp, dx, dt, t, q, m, ael, a, ng, N, x, vx);
 			move(nsp, rho, rho0, qdx, N, x, vx, ng);
 			fields(rho, L, iw, dx, E, t, ng, a, ael);
 
-			//Frame frame;
 
-			nlohmann::json frame;
-			nlohmann::json particles;
+			frame.electricField = E[t];
+			std::vector<Particle> particles;
+
+			nlohmann::json JSONFrame;
+			nlohmann::json JSONParticles;
 			int particleId = 0;
 
 			for (int species = 0; species < nsp; species++) {
@@ -394,7 +398,8 @@ public:
 					particle.velocity = vx[species][i];
 					particle.species = species;
 
-					//particles.push_back(particle);
+					particles.push_back(particle);
+
 
 					nlohmann::json particleObject;
 
@@ -403,22 +408,19 @@ public:
 					particleObject["species"] = species;
 					particleObject["id"] = particleId;
 					
-					particles.push_back(particleObject);
+					JSONParticles.push_back(particleObject);
 
 					particleId++;
 				}
 			}
 
-			frame["particles"] = particles;
+			JSONFrame["particles"] = JSONParticles;
+			JSONFrame["frameNumber"] = t;  
+			frames.push_back(JSONFrame);
 
-			frame["frameNumber"] = t;  
-
-			//nlohmann::json frame;
-			//frame["positions"] = x[0];
-			//frame["velocities"] = vx[0];
-			frames.push_back(frame);
-
-			//picData.frameData.push_back(frameData);
+			frame.particles = particles;
+			frame.frameNumber = t;
+			mPicData.frames.push_back(frame);
 
 			//// Create a scatter plot 
 			//matplot::scatter(x[0], vx[0], 1);
@@ -432,6 +434,8 @@ public:
 		JSON["phaseFrames"] = frames;
 
 		std::cout << JSON.dump() << std::endl;
+
+		return true;
 	}
 };
 
