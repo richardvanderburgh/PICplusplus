@@ -17,8 +17,11 @@
     <label for="param2">Time Steps:</label>
     <input type="text" id="param2" name="param2" value="50">
     <br>
-    <label for="param3">Frame Duration (ms):</label>
-    <input type="text" id="param3" name="param3" value="100">
+    <label for="param3">Time Stepsize:</label>
+    <input type="text" id="param3" name="param3" value="0.1">
+    <br>
+    <label for="param4">Frame Duration (ms):</label>
+    <input type="text" id="param4" name="param4" value="100">
     <br>
     <input type="submit" value="Run Simulation">
   </form>
@@ -118,7 +121,8 @@
         // Get form datak
         var param1 = $('#param1').val();
         var param2 = $('#param2').val();
-        var duration = $('#param3').val();
+        var param3 = $('#param3').val();
+        var duration = $('#param4').val();
 
         document.getElementById('frame-slider').max = param2 - 1;
 
@@ -126,7 +130,7 @@
         $.ajax({
           url: 'http://127.0.0.1:8000/run-simulation/',  // Replace with your API endpoint URL
           method: 'GET',
-          data: { param1: param1, param2: param2 },
+          data: { param1: param1, param2: param2, param3: param3 },
           success: function (response) {
             var PICData = JSON.parse(response);
             console.log(PICData)

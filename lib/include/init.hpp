@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/algorithm/algorithm.hpp>
+//#include <boost/algorithm/algorithm.hpp>
 #include <fft.hpp>
 #include <fftw3.h>
 #include <matplot/matplot.h>
@@ -38,7 +38,7 @@ public:
 		std::vector<Frame> frames;
 	};
 
-	void initialize(int N1, int nt) {
+	void initialize(int N1, int nt, double dt) {
 		//int ng, int nt, double L, double dt, std::vector<int> N, int nsp, std::vector<double> qm, std::vector<double> wp, std::vector<double> wc, int mplot
 		// 
 		// FIRST EE - Set initial input values
@@ -47,7 +47,7 @@ public:
 		double L = 6.28318530717958; // Physical length of system in meters
 		int nsp = 2; // Number of particle species
 		//int nt = 5;//600; // Number of time steps
-		double dt = .1; // Time step in seconds
+		//double dt = .1; // Time step in seconds
 		int epsi = 1; // 1 over epsilon naught(F / m) Epsilon normalized to 1
 		const int ng = 32; // Number of spatial grid points - only change the power of 2
 		int iw = 2; // 1 for nearest grid point, 2 for linear

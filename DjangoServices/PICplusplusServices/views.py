@@ -6,15 +6,17 @@ import json
 def run_simulation(request):
     if request.method == 'GET':
         param1 = request.GET.get('param1')
-        param2 = request.GET.get('param2')
+        param2 = request.GET.get('param2')       
+        param3 = request.GET.get('param3')
     else:
         param1 = request.POST.get('param1')
         param2 = request.POST.get('param2')
+        param3 = request.POST.get('param3')
 
     # Run the C++ executable
     try:
         executablePath = "C:\\Users\\vande\\Programming\\PICplusplus\\build\\bin\\PIC++Main.exe"
-        result = subprocess.run([executablePath, param1, param2], capture_output=True, text=True)
+        result = subprocess.run([executablePath, param1, param2, param3], capture_output=True, text=True)
         output = result.stdout.strip()
 
         return JsonResponse(output, safe=False)
