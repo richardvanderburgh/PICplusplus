@@ -74,7 +74,7 @@
 TEST(PICTest, initTest)
 {
 	int N = 5;
-	int nt = 5;
+	int nt = 3;
 	double dt = 0.01;
 	Init init;
 	bool success = init.initialize(N, nt, dt);

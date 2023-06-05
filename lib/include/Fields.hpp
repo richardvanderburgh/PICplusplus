@@ -1,5 +1,11 @@
-void fields(std::vector<double>& rho, double L, int iw, double dx, std::vector<std::vector<double>>& E, int t, const int constNg, std::vector<double>& a, double ael)
-{
+
+void fields(std::vector<double>& rho,
+	double L, int iw, double dx, 
+	std::vector<std::vector<double>>& E, 
+	int t, const int constNg, 
+	std::vector<double>& a, 
+	double ael) {
+	
 	// FIELDS - E field solver
 	const int ng = 32;
 	std::vector<double> phi(ng + 1, 0.0);
@@ -9,15 +15,30 @@ void fields(std::vector<double>& rho, double L, int iw, double dx, std::vector<s
 	rho[0] += rho[ng];
 	rho[ng] = rho[0];
 
-	complex complexRho[ng];
-	complex complexRhok[ng];
-	complex complexPhik[ng];
+	fftw_complex complexRho[ng + 1];
+	//complex complexRhok[ng];
+	fftw_complex complexRhok[ng];   // Output array
+	fftw_complex complexPhik[ng + 1];
+	fftw_complex complexPhi[ng + 1];
+	fftw_plan forwardPlan;
 
-	for (int i = 0; i < ng; i++) { complexRho[i] = rho[i]; }
-	CFFT::Forward(complexRho, complexRhok, ng);
+	//for (int i = 0; i < ng; i++) { complexRho[i] = rho[i]; }
+	//CFFT::Forward(complexRho, complexRhok, ng);
+	for (int i = 0; i < ng + 1; i++) {
+		complexRho[i][0] = rho[i];
+		complexRho[i][1] = 0;
+		complexPhik[i][0] = 0;
+		complexPhik[i][1] = 0;
+		complexPhi[i][0] = 0;
+		complexPhi[i][1] = 0;
+	}
+
+	forwardPlan = fftw_plan_dft_1d(ng, complexRho, complexRhok, FFTW_FORWARD,  FFTW_ESTIMATE);
+	fftw_execute(forwardPlan);
+	//fftw_destroy_plan(forwardPlan);
 
 	double tol = 1;
-	for (int k = 0; k < ng; k++) {
+	for (int k = 0; k < ng + 1; k++) {
 		int ii;
 		if (k == 0) {
 			ii = tol;
@@ -29,23 +50,33 @@ void fields(std::vector<double>& rho, double L, int iw, double dx, std::vector<s
 			ii = k - ng;
 		}
 
-		complexPhik[k] = complexRhok[k] / -std::pow(2.0 * M_PI * ii / L, 2.0);
+		if (ii == 0)
+			break;
+
+		complexPhik[k][0] = complexRhok[k][0] / -std::pow(2.0 * M_PI * ii / L, 2.0);
+		complexPhik[k][1] = complexRhok[k][1] / -std::pow(2.0 * M_PI * ii / L, 2.0);
+
 		//esestot[t + 1] = (esestot[t + 1] - (phik[k] * rhok[k])) / 2;
 	}
 
-	complex complexPhi[ng];
-	CFFT::Inverse(complexPhik, complexPhi, ng);
+	/*complex complexPhi[ng];
+	CFFT::Inverse(complexPhik, complexPhi, ng);*/
 
-	// Perform FFT using FFTW
-	//std::vector<std::complex<double>> output(ng);
-	//fftw_plan plan = fftw_plan_dft_r2c_1d(ng, rho.data(), reinterpret_cast<fftw_complex*>(output.data()), FFTW_ESTIMATE);
-	//fftw_execute(plan);
-	//fftw_destroy_plan(plan);
+	fftw_plan inversePlan;
+	inversePlan = fftw_plan_dft_1d(ng, complexPhik, complexPhi, FFTW_BACKWARD, FFTW_ESTIMATE);
+	fftw_execute(inversePlan);
+	//fftw_destroy_plan(inversePlan);
+	//fftw_free(complexRhok);
 
+	for (int i = 0; i < ng + 1; i++) {
+		double real = complexPhi[i][0];
+		double imag = complexPhi[i][1];
 
-	for (int i = 0; i < ng; i++) {
-		phi[i] = -complexPhi[i].re();
+		phi[i] = -real;
 	}
+
+	//fftw_free(complexPhi);
+
 
 	phi[ng] = phi[0];
 
