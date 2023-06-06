@@ -36,6 +36,10 @@
 
   <script>
     $(document).ready(function () {
+
+      var yMin = -2;
+      var yMax = 2;
+
       var jsonData;
       var positions;
       var width = 900;
@@ -53,8 +57,8 @@
         .domain([0, ng + 5])
         .range([margin.left, width - margin.right]); // Define the range of the x-axis within the SVG container
 
-      var yMin = -2;
-      var yMax = 2;
+      // var yMin = -10;
+      // var yMax = 10;
 
       var yScale = d3.scaleLinear()
         .domain([yMin, yMax])
@@ -205,7 +209,8 @@
       function animate(frame) {
         svg.selectAll('circle').remove();
 
-        const numSpecies = 2;
+        const numSpecies = 3;
+        const colors = ['steelblue', 'red', 'green', 'orange'];
         for (let species = 0; species < numSpecies; species++) {
           // console.log("inside")
           positions = getPositionsOfSpecies(frame, species);
@@ -226,7 +231,7 @@
             .attr('cx', (d, i) => xScale(positions[i]))
             .attr('cy', (d, i) => yScale(velocities[i]))
             .attr('r', 5)
-            .style('fill', (d, i) => (species === 0 ? 'steelblue' : 'red'));
+            .style('fill', (d, i) => (colors[species]));
         };
       }
     });

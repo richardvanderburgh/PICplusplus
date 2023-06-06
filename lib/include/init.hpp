@@ -47,7 +47,7 @@ public:
 		std::string example = "Electron - Electron Stream";
 		// Input Variables
 		double L = 6.28318530717958; // Physical length of system in meters
-		int nsp = 2; // Number of particle species
+		int nsp = 3; // Number of particle species
 		//int nt = 5;//600; // Number of time steps
 		//double dt = .1; // Time step in seconds
 		int epsi = 1; // 1 over epsilon naught(F / m) Epsilon normalized to 1
@@ -68,28 +68,63 @@ public:
 		int ifvx = 0;// nt / 10 + 4;
 		int nplot = 30; // ? ?
 
+		int wp1 = 1;
+		int wc1 = 0;
+		int qm1 = -1;
+		int VT1	 = 0;
+		int VT2	 = 0;
+		int NV2	 = 0;
+		int NLG = 1;
+		//int v01	 = ;
+		int pch1 = 0;
+
 		// //Species Input Variables
-		std::vector<int> N = { N1, N1 }; // Number of simulation particles
-		std::array<int, 2> wp = { 1, 1 }; // Plasma Frequency
-		std::array<int, 2> wc = { 0, 0 }; // Cyclotron frequency
-		std::array<int, 2> qm = { -1, -1 }; // q / m charge to mass ratio(C / kg)
-		std::array<int, 2> vt1 = { 0, 0 }; // RMS thermal velocity for random velocities
-		std::array<int, 2> vt2 = { 0, 0 }; // RMS thermal velocity for ordered velocities
-		std::array<int, 2> nv2 = { 0, 0 };
-		std::array<int, 2> nlg = { 1, 1 }; // Number of loading groups
-		std::array<int, 2> v0 = { 1, -1 }; // Drift velocity
-		std::array<int, 2> pch = { 0, 0 }; // species pitch angle
+		std::vector<int> N(nsp); // Number of simulation particles
+		std::vector<int> wp(nsp); // Plasma Frequency
+		std::vector<int> wc(nsp); // Cyclotron frequency
+		std::vector<int> qm(nsp); // q / m charge to mass ratio(C / kg)
+		std::vector<int> vt1(nsp); // RMS thermal velocity for random velocities
+		std::vector<int> vt2(nsp); // RMS thermal velocity for ordered velocities
+		std::vector<int> nv2(nsp);
+		std::vector<int> nlg(nsp) ; // Number of loading groups
+		std::vector<int> v0 = { 1, -1,  0}; // Drift velocity
+		std::vector<int> pch(nsp); // species pitch angle
 		int distribution = 1; // Distribution 0 = Cold 1 = Two - Stream
 
 		// Perturbation
-		std::array<int, 2> mode = { 1, 1 };
-		std::array<double, 2> x1 = { 0.001, 0.001 };
-		std::array<int, 2> v1 = { 0, 0 };
-		std::array<int, 2> thetax = { 0, 0 };
-		std::array<int, 2> thetav = { 0, 0 };
+		int MODE = 1;
+		double amp = 0.001;
+		int vPerturb = 0;
+		int THETAX = 0;
+		int THETAV = 0;
+
+		std::vector<int>    mode(nsp);
+		std::vector<double> x1(nsp);
+		std::vector<int>    v1(nsp);
+		std::vector<int>    thetav(nsp);
+		std::vector<int>    thetax(nsp);
 
 		//////////////////////////////////////////////////////////
 		// INIT - Initial values for each species
+
+		int npt = 0;
+		for (int i = 0; i < nsp; i++) {
+			N[i] = N1;
+			npt += N[i];
+
+			wp[i] = wp1;
+			wc[i] = wc1;
+			qm[i] = qm1;
+			vt1[i] = VT1;
+			vt2[i] = VT2;
+			nv2[i] = NV2;
+			nlg[i] = NLG;
+			mode[i] = MODE;
+			x1[i] = amp;
+			v1[i] = vPerturb;
+			thetax[i] = THETAX;
+			thetav[i] = THETAV;
+		}
 
 		int cv = 8;
 		int angle = 0; // Magnetic field angle
@@ -106,11 +141,6 @@ public:
 		int nxp1 = ng + 1;
 		int nxp2 = ng + 2;
 		int slx = ng;
-		int npt = 0;
-
-		for (int i = 0; i < nsp; i++) {
-			npt += N[i];
-		}
 
 		std::vector<int> X1;
 		std::vector<int> X2;
@@ -342,7 +372,7 @@ public:
 		// End of INIT
 		// 
 		// SETRHO - c  Converts position to computer normalization and accumulates charge density.
-		std::vector<double> qdx{ q[0] / dx, q[1] / dx };
+		std::vector<double> qdx(nsp);
 		std::vector<double> rho(ng + 1, 0.0); // charge density at the spatial grid points
 		std::vector<std::vector<double>> rhos(nsp, std::vector<double>(ng + 1, 0.0));
 		std::vector<std::vector<double>> rho0(nsp, std::vector<double>(ng + 1, 0.0));
@@ -351,20 +381,20 @@ public:
 		std::vector<std::vector<double>> drhodata(nsp, std::vector<double>(ng + 1, 0.0));
 
 		for (int species = 0; species < nsp; species++) {
-
+			qdx[species] = q[species] / dx;
 			retRho(species, ng, dx, N, qdx, rho, x, rho0, rhos, iw);
 			// Velocities
 			for (int K = 0; K < N[species]; ++K) {
 				vx[species][K] *= dtdx;
 			}
 		}
+
 		int t = 0;
 		double ael = 1;
 
 		// Acceleration
 		std::vector<double> a(ng + 1);
 		fields(rho, L, iw, dx, E, t, ng, a, ael);
-
 		accel(nsp, dx, dt, t, q, m, ael, a, ng, N, x, vx);
 
 		Frame frame;
@@ -386,6 +416,7 @@ public:
 				particleId++;
 			}
 		}
+
 		frame.particles = particles;
 		frame.electricField = E[t];
 		frame.frameNumber = t;
@@ -431,7 +462,7 @@ public:
 					particleObject["velocity"] = vx[species][i];
 					particleObject["species"] = species;
 					particleObject["id"] = particleId;
-					
+
 					JSONParticles.push_back(particleObject);
 
 					particleId++;
@@ -439,7 +470,7 @@ public:
 			}
 
 			JSONFrame["particles"] = JSONParticles;
-			JSONFrame["frameNumber"] = t;  
+			JSONFrame["frameNumber"] = t;
 			frames.push_back(JSONFrame);
 
 			frame.particles = particles;
@@ -462,4 +493,3 @@ public:
 		return true;
 	}
 };
-
