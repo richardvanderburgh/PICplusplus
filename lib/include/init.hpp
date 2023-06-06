@@ -358,14 +358,38 @@ public:
 				vx[species][K] *= dtdx;
 			}
 		}
+		int t = 0;
+		double ael = 1;
 
 		// Acceleration
 		std::vector<double> a(ng + 1);
-
-		int t = 0;
-		double ael = 1;
 		fields(rho, L, iw, dx, E, t, ng, a, ael);
+
 		accel(nsp, dx, dt, t, q, m, ael, a, ng, N, x, vx);
+
+		Frame frame;
+		std::vector<Particle> particles;
+
+		for (int species = 0; species < nsp; species++) {
+			for (int i = 0; i < N[species]; i++) {
+				int particleId = 0;
+
+				Particle particle;
+
+				particle.id = particleId;
+				particle.position = x[species][i];
+				particle.velocity = vx[species][i];
+				particle.species = species;
+
+				particles.push_back(particle);
+
+				particleId++;
+			}
+		}
+		frame.particles = particles;
+		frame.electricField = E[t];
+		frame.frameNumber = t;
+		mPicData.frames.push_back(frame);
 
 		//BEGIN TIME LOOP 
 

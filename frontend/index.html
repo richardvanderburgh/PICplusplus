@@ -53,8 +53,8 @@
         .domain([0, ng + 5])
         .range([margin.left, width - margin.right]); // Define the range of the x-axis within the SVG container
 
-      var yMin = -30;
-      var yMax = 30;
+      var yMin = -2;
+      var yMax = 2;
 
       var yScale = d3.scaleLinear()
         .domain([yMin, yMax])
@@ -72,7 +72,7 @@
       // Create a group element for the y-axis
       svg.append("g")
         .attr("class", "y-axis")
-        .attr("transform", `translate(${margin.left}, 0)`)
+        .attr("transform", `translate(${margin.left}, 10)`)
 
       // Call the x-axis component
       svg.select(".x-axis")

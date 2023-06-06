@@ -24,7 +24,7 @@ void accel(int nsp, double dx, double dt, int t, std::vector<double> q, std::vec
 		for (int i = 0; i < N[species]; ++i) {
 			int j = floor(x[species][i]);
 			double vo = vx[species][i];
-			double vn = vo + a[j] + (x[species][i] - j - 1) * (a[j + 1] - a[j]);
+			double vn = vo + a[j] + (x[species][i] - j) * (a[j + 1] - a[j]);
 			v1s += vn;
 			v2s += vo * vn;
 			vx[species][i] = vn;
