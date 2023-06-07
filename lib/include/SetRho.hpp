@@ -16,9 +16,9 @@ void retRho(int species, int ng, double dx,
 	// If it is the first group of particles, then clear out rho.
 	if (species == 0) {
 		for (int j = 1; j < ng + 1; j++) {
-			rho[j] = rho0[1][j];
+			rho[j] = rho0[0][j];
 		}
-		rho[1] = 0;
+		rho[0] = 0;
 	}
 	// Add on fixed neutralizing charge density
 	// (not needed when all species are mobile - but harmless.)

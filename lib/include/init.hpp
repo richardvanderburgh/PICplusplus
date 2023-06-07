@@ -40,14 +40,14 @@ public:
 	};
 	PicData mPicData;
 
-	bool initialize(int N1, int nt, double dt) {
+	bool initialize(int N1, int nt, double dt, int MODE, double V0, int nsp) {
 		//int ng, int nt, double L, double dt, std::vector<int> N, int nsp, std::vector<double> qm, std::vector<double> wp, std::vector<double> wc, int mplot
 		// 
 		// FIRST EE - Set initial input values
 		std::string example = "Electron - Electron Stream";
 		// Input Variables
 		double L = 6.28318530717958; // Physical length of system in meters
-		int nsp = 3; // Number of particle species
+		//int nsp = 3; // Number of particle species
 		//int nt = 5;//600; // Number of time steps
 		//double dt = .1; // Time step in seconds
 		int epsi = 1; // 1 over epsilon naught(F / m) Epsilon normalized to 1
@@ -87,12 +87,12 @@ public:
 		std::vector<int> vt2(nsp); // RMS thermal velocity for ordered velocities
 		std::vector<int> nv2(nsp);
 		std::vector<int> nlg(nsp) ; // Number of loading groups
-		std::vector<int> v0 = { 1, -1,  0}; // Drift velocity
+		std::vector<double> v0 = { V0, -V0,  0}; // Drift velocity
 		std::vector<int> pch(nsp); // species pitch angle
 		int distribution = 1; // Distribution 0 = Cold 1 = Two - Stream
 
 		// Perturbation
-		int MODE = 1;
+		//int MODE = 1;
 		double amp = 0.001;
 		int vPerturb = 0;
 		int THETAX = 0;
@@ -174,7 +174,7 @@ public:
 		double theta = M_PI / 180 * angle;
 		double costh = cos(theta);
 		double sinth = sin(theta);
-		double b0 = wc[1] / qm[1];
+		double b0 = wc[0] / qm[0];
 		double bx0 = b0 * costh;
 		double by0 = b0 * sinth;
 
