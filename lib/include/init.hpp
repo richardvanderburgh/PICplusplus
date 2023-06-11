@@ -87,7 +87,7 @@ public:
 		std::vector<int> vt2(nsp); // RMS thermal velocity for ordered velocities
 		std::vector<int> nv2(nsp);
 		std::vector<int> nlg(nsp) ; // Number of loading groups
-		std::vector<double> v0 = { V0, -V0,  0}; // Drift velocity
+		std::vector<double> v0 = { V0, -V0, 0, 2 * V0, -2 * V0}; // Drift velocity
 		std::vector<int> pch(nsp); // species pitch angle
 		int distribution = 1; // Distribution 0 = Cold 1 = Two - Stream
 
