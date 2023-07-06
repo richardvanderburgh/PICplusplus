@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 	int nt = atoi(argv[2]);
 	double dt = std::stod(argv[3]);
     int mode = std::stod(argv[4]);
-    int V0 = std::stod(argv[5]);
+    double V0 = std::stod(argv[5]);
     int numSpecies = std::stod(argv[6]);
     double amplitude = std::stod(argv[7]);
     double VT1 = std::stod(argv[8]);
