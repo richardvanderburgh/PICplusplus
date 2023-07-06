@@ -11,6 +11,9 @@ def run_simulation(request):
         param4 = request.GET.get('param4')
         param5 = request.GET.get('param5')
         param6 = request.GET.get('param6')
+        param7 = request.GET.get('param7')
+        param8 = request.GET.get('param8')
+
 
     else:
         param1 = request.POST.get('param1')
@@ -19,11 +22,14 @@ def run_simulation(request):
         param4 = request.POST.get('param4')
         param5 = request.POST.get('param5')
         param6 = request.POST.get('param6')
+        param7 = request.POST.get('param7')
+        param8 = request.POST.get('param8')
+
 
     # Run the C++ executable
     try:
         executablePath = "C:\\Users\\vande\\Programming\\PICplusplus\\build\\bin\\PIC++Main.exe"
-        result = subprocess.run([executablePath, param1, param2, param3, param4, param5, param6], capture_output=True, text=True)
+        result = subprocess.run([executablePath, param1, param2, param3, param4, param5, param6, param7, param8], capture_output=True, text=True)
         output = result.stdout.strip()
 
         return JsonResponse(output, safe=False)

@@ -73,11 +73,19 @@
 //
 TEST(PICTest, EFrame0Test)
 {
+	Init init;
+
 	int N = 5;
 	int nt = 3;
 	double dt = 0.1;
-	Init init;
-	bool success = init.initialize(N, nt, dt);
+
+	int mode = 1;
+	int V0 = 1;
+	int numSpecies = 2;
+	double amplitude = 0.001;
+	double VT1 = 0;
+
+	bool success = init.initialize(N, nt, dt, mode, V0, numSpecies, amplitude, VT1);
 
 	int ng = 32;
 
@@ -137,11 +145,19 @@ TEST(PICTest, EFrame0Test)
 
 TEST(PICTest, EFrame1Test)
 {
+	Init init;
+
 	int N = 5;
 	int nt = 3;
 	double dt = 0.1;
-	Init init;
-	bool success = init.initialize(N, nt, dt);
+
+	int mode = 1;
+	int V0 = 1;
+	int numSpecies = 2;
+	double amplitude = 0.001;
+	double VT1 = 0;
+
+	bool success = init.initialize(N, nt, dt, mode, V0, numSpecies, amplitude, VT1);
 
 	int ng = 32;
 
@@ -201,11 +217,19 @@ TEST(PICTest, EFrame1Test)
 
 TEST(PICTest, E_N_5_nt_15_Frame0Test)
 {
-	int N = 5;
-	int nt = 15;
-	double dt = 0.1;
 	Init init;
-	bool success = init.initialize(N, nt, dt);
+
+	int N = 5;
+	int nt = 3;
+	double dt = 0.1;
+
+	int mode = 1;
+	int V0 = 1;
+	int numSpecies = 2;
+	double amplitude = 0.001;
+	double VT1 = 0;
+
+	bool success = init.initialize(N, nt, dt, mode, V0, numSpecies, amplitude, VT1);
 
 	int ng = 32;
 

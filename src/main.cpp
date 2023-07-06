@@ -19,6 +19,8 @@ int main(int argc, char* argv[]) {
     int mode = std::stod(argv[4]);
     int V0 = std::stod(argv[5]);
     int numSpecies = std::stod(argv[6]);
+    double amplitude = std::stod(argv[7]);
+    double VT1 = std::stod(argv[8]);
 
     //if (argc < 2) {
     //    std::cerr << "Please provide the input file path." << std::endl;
@@ -61,7 +63,7 @@ int main(int argc, char* argv[]) {
 
     //file.close(); // Close the input file
 
-	bool success = init.initialize(N, nt, dt, mode, V0, numSpecies);
+	bool success = init.initialize(N, nt, dt, mode, V0, numSpecies, amplitude, VT1 );
 
 	return 0;
 }

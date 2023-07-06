@@ -1,7 +1,6 @@
 #pragma once
 
-
-void retRho(int species, int ng, double dx, 
+void setRho(int species, int ng, double dx, 
 	std::vector<int> N, 
 	std::vector<double> qdx, 
 	std::vector<double>& rho, 
@@ -20,6 +19,7 @@ void retRho(int species, int ng, double dx,
 		}
 		rho[0] = 0;
 	}
+
 	// Add on fixed neutralizing charge density
 	// (not needed when all species are mobile - but harmless.)
 	for (int j = 0; j < rhos[0].size(); j++) {
@@ -44,6 +44,7 @@ void retRho(int species, int ng, double dx,
 			rho[j] = rho[j] + qdx[species];
 		}
 	}
+
 	// Linear
 	else if (iw == 2) {
 		for (int i = 0; i < N[species]; i++) {

@@ -3,8 +3,9 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>PIC++</title>
+  <title>++</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 
@@ -29,14 +30,20 @@
     <label for="param6">Number of Species:</label>
     <input type="text" id="param6" name="param6" value="1">
     <br>
+    <label for="param7">Amplitude:</label>
+    <input type="text" id="param7" name="param7" value="1">
+    <br>
+    <label for="param8">Thermal Velocity</label>
+    <input type="text" id="param8" name="param8" value="0.00">
+    <br>
     <label for="duration">Frame Duration (ms):</label>
     <input type="text" id="duration" name="duration" value="100">
     <br>
     <label for="yMin">yMin:</label>
-    <input type="text" id="yMin" name="yMin" value="-2">
+    <input type="text" id="yMin" name="yMin" value="-10">
     <br>
     <label for="yMax">yMax:</label>
-    <input type="text" id="yMax" name="yMax" value="2">
+    <input type="text" id="yMax" name="yMax" value="10">
     <br>
     <input type="submit" value="Run Simulation">
   </form>
@@ -72,8 +79,8 @@
         .domain([0, ng + 5])
         .range([margin.left, width - margin.right]); // Define the range of the x-axis within the SVG container
 
-      var yMin = -2;
-      var yMax = 2;
+      //var yMin = -2;
+      //var yMax = 2;
 
       var yScale = d3.scaleLinear()
         .domain([yMin, yMax])
@@ -144,6 +151,8 @@
         var param4 = $('#param4').val();
         var param5 = $('#param5').val();
         var param6 = $('#param6').val();
+        var param7 = $('#param7').val();
+        var param8 = $('#param8').val();
 
         var duration = $('#duration').val();
 
@@ -153,7 +162,7 @@
         $.ajax({
           url: 'http://127.0.0.1:8000/run-simulation/',  // Replace with your API endpoint URL
           method: 'GET',
-          data: { param1: param1, param2: param2, param3: param3, param4: param4, param5: param5, param6: param6   },
+          data: { param1: param1, param2: param2, param3: param3, param4: param4, param5: param5, param6: param6 , param7: param7, param8: param8   },
           success: function (response) {
             var PICData = JSON.parse(response);
             console.log(PICData)

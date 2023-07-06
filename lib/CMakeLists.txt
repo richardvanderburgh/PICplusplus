@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(PIC++Lib)
 
-find_package(Matplot++ REQUIRED HINTS $ENV{MATPLOTPP_DIR})
+# find_package(Matplot++ REQUIRED HINTS $ENV{MATPLOTPP_DIR})
 
 add_library(${PROJECT_NAME} STATIC
 
@@ -30,6 +30,6 @@ target_link_libraries( ${PROJECT_NAME}
 
 ${CONAN_LIBS}
 gtest
-Matplot++::matplot
+# Matplot++::matplot
 )
 
